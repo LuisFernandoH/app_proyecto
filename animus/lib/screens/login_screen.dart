@@ -3,6 +3,10 @@ import 'package:animus/providers/login_form_provider.dart';
 import 'package:animus/services/auth_services.dart';
 import 'package:animus/services/notifications_services.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:animus/screens/VideoScreen.dart';
+
+
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -13,7 +17,7 @@ class LoginScreen extends StatelessWidget {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.black87, Colors.black54],
+            colors: [Color.fromARGB(221, 6, 25, 59), Color.fromARGB(221, 26, 76, 169)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -45,11 +49,20 @@ class _LoginForm extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            Text(
+              'Abstergo',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.splineSansMono(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
             // Icono o logo en la parte superior
-            const Icon(
-              Icons.shield,
-              color: Colors.red,
-              size: 80,
+             Image.network(
+           'https://static.wikia.nocookie.net/theassassinscreed/images/0/0a/Abstergo-FH.png/revision/latest?cb=20180629071736&path-prefix=es', // Reemplaza con la URL de tu imagen
+            height: 80,
+            fit: BoxFit.contain,
             ),
             const SizedBox(height: 20),
             const Text(
@@ -77,11 +90,11 @@ class _LoginForm extends StatelessWidget {
                 ),
                 hintStyle: const TextStyle(color: Colors.white54),
                 enabledBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.redAccent),
+                  borderSide: const BorderSide(color: Color.fromARGB(255, 190, 190, 190)),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.red),
+                  borderSide: const BorderSide(color: Color.fromARGB(255, 163, 163, 163)),
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
@@ -108,11 +121,11 @@ class _LoginForm extends StatelessWidget {
                 ),
                 hintStyle: const TextStyle(color: Colors.white54),
                 enabledBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.redAccent),
+                  borderSide: const BorderSide(color: Color.fromARGB(255, 190, 190, 190)),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.red),
+                  borderSide: const BorderSide(color: Color.fromARGB(255, 163, 163, 163)),
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
@@ -129,44 +142,48 @@ class _LoginForm extends StatelessWidget {
                 onPressed: () {},
                 child: const Text(
                   '¿Olvidaste tu contraseña?',
-                  style: TextStyle(color: Colors.redAccent),
+                  style: TextStyle(color: Color.fromARGB(255, 206, 206, 206)),
                 ),
               ),
             ),
             ElevatedButton(
-              onPressed: loginForm.isLoading
-                  ? null
-                  : () async {
-                      final authService =
-                          Provider.of<AuthServices>(context, listen: false);
-                      final String? errorMessage = await authService.login(
-                        _emailController.text,
-                        _passwordController.text,
-                      );
+  onPressed: loginForm.isLoading
+      ? null
+      : () async {
+          final authService = Provider.of<AuthServices>(context, listen: false);
+          final String? errorMessage = await authService.login(
+            _emailController.text,
+            _passwordController.text,
+          );
 
-                      if (errorMessage == null) {
-                        Navigator.pushReplacementNamed(context, 'home');
-                      } else {
-                        NotificationsServices.showSnackbar(errorMessage);
-                        loginForm.isLoading = false;
-                      }
-                    },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.redAccent,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: const Text(
-                'Iniciar sesión',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ),
+          if (errorMessage == null) {
+            // Redirige a la pantalla del video
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => VideoScreen()),
+            );
+          } else {
+            NotificationsServices.showSnackbar(errorMessage);
+            loginForm.isLoading = false;
+          }
+        },
+  style: ElevatedButton.styleFrom(
+    backgroundColor: const Color.fromARGB(255, 167, 167, 167),
+    padding: const EdgeInsets.symmetric(vertical: 16),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(10),
+    ),
+  ),
+  child: const Text(
+    'Iniciar sesión',
+    style: TextStyle(
+      fontSize: 20,
+      fontWeight: FontWeight.bold,
+      color: Colors.white,
+    ),
+  ),
+),
+
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {

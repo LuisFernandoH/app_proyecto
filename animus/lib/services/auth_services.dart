@@ -94,6 +94,36 @@ class AuthServices extends ChangeNotifier {
     } 
     
   }
+
+ // Método para obtener los nombres de los asesinos
+  Future<List<String>> getAsesinos() async {
+    final url = Uri.http(_baseUrl, '/api/Asesinos/nombres');
+    final resp = await http.get(url);
+
+    if (resp.statusCode == 200) {
+      List<dynamic> nombres = json.decode(resp.body);
+      return nombres.cast<String>();
+    } else {
+      throw Exception('Error al cargar los nombres de los asesinos');
+    }
+  }
+
+// Método para registrar asesinos
+  Future<String?> registrarAsesino(Map<String, String> asesinoData) async {
+  final url = Uri.http(_baseUrl, '/api/Asesinos');
+  final response = await http.post(
+    url,
+    headers: {'Content-Type': 'application/json'},
+    body: json.encode(asesinoData),
+  );
+
+  if (response.statusCode == 200) {
+    return null; // El registro fue exitoso
+  } else {
+    return 'Error al registrar al asesino';
+  }
+}
+
   //PA SABER SI todavia tiene la cuenta activa. si no existe nada regresa vacio, q significa que no esta autenticado
   Future<String> readToken() async {
     return await storage.read(key: 'token') ?? '';

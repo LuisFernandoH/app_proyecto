@@ -18,11 +18,7 @@ class RegistroScreen extends StatelessWidget {
         width: double.infinity,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [
-              Color(0xFF1E1E1E), // color oscuro de fondo
-              Color(0xFF444444), // gradiente gris medio
-              Color(0xFF8C8C8C), // gradiente gris claro
-            ],
+            colors: [Color.fromARGB(221, 6, 25, 59), Color.fromARGB(221, 26, 76, 169)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -33,16 +29,21 @@ class RegistroScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               // Logo o Imagen Decorativa
-              Container(
-                width: size.width * 0.6,
-                height: size.height * 0.2,
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('../assets/images/assassins_creed_logo.png'), // Coloca el logo en tu carpeta de assets
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ),
+               Image.network(
+              'https://static.wikia.nocookie.net/theassassinscreed/images/0/0a/Abstergo-FH.png/revision/latest?cb=20180629071736&path-prefix=es', // Reemplaza con la URL de tu imagen
+                height: 80,
+               fit: BoxFit.contain,
+               ),
+              // Container(
+              //   width: size.width * 0.6,
+              //   height: size.height * 0.2,
+              //   decoration: const BoxDecoration(
+              //     image: DecorationImage(
+              //       image: AssetImage('../assets/images/assassins_creed_logo.png'), // Coloca el logo en tu carpeta de assets
+              //       fit: BoxFit.contain,
+              //     ),
+              //   ),
+              // ),
               const SizedBox(height: 40),
               // Campo de Email
               TextField(

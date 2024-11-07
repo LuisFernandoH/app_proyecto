@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:animus/services/auth_services.dart';
 import 'package:provider/provider.dart';
+import 'registro_asesino_screen.dart'; // Importa el archivo donde tienes el RegistroAsesinoScreen.
+import 'package:animus/services/auth_services.dart'; // Asegúrate de usar la ruta correcta
+
 
 class PrincipalScreen extends StatelessWidget {
   const PrincipalScreen({super.key});
@@ -8,12 +10,12 @@ class PrincipalScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Assassin\'s Creed Login',
+      title: 'Assassin\'s Creed',
       theme: ThemeData(
         primaryColor: Colors.black,
         textTheme: TextTheme(
-          bodyLarge: TextStyle(color: Colors.white), // Reemplazo de bodyText2
-          labelLarge: TextStyle(fontSize: 20, color: Colors.white), // Reemplazo de button
+          bodyLarge: TextStyle(color: Colors.white),
+          labelLarge: TextStyle(fontSize: 20, color: Colors.white),
         ),
       ),
       home: Scaffold(
@@ -21,10 +23,14 @@ class PrincipalScreen extends StatelessWidget {
           backgroundColor: Colors.black87,
           title: Row(
             children: [
-              Icon(Icons.shield, color: Colors.red), // Un icono acorde a la temática
+              Image.network(
+           'https://static.wikia.nocookie.net/theassassinscreed/images/0/0a/Abstergo-FH.png/revision/latest?cb=20180629071736&path-prefix=es', // Reemplaza con la URL de tu imagen
+            height: 30,
+            fit: BoxFit.contain,
+            ),
               const SizedBox(width: 10),
               const Text(
-                'Assassin\'s Creed Login',
+                'Bienvenido al Animus',
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -38,64 +44,57 @@ class PrincipalScreen extends StatelessWidget {
         body: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.black87, Colors.black54],
+              colors: [Color.fromARGB(221, 6, 25, 59), Color.fromARGB(221, 26, 76, 169)],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             ),
           ),
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: 20),
-                  const Text(
-                    'Bienvenido al Credo',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+          child: Column(
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  // Aquí agregamos la navegación a la pantalla de registro de asesino
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => RegistroAsesinoScreen(),
                     ),
-                  ),
-                  const SizedBox(height: 50),
-                  ElevatedButton.icon(
-                    onPressed: () async {
-                      final authService = Provider.of<AuthServices>(context, listen: false);
-                      await authService.logout();
-                      final token = await authService.storage.read(key: "token");
-
-                      if (token == null) {
-                        Navigator.pushReplacementNamed(context, 'login');
-                      } else {
-                        print('El token aún está presente.');
-                      }
-                    },
-                    style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all<Color>(Colors.redAccent),
-                      padding: MaterialStateProperty.all<EdgeInsets>(
-                          const EdgeInsets.symmetric(vertical: 15)),
-                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                        RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                      ),
-                    ),
-                    icon: Icon(Icons.logout, color: Colors.white),
-                    label: const Text(
-                      'Cerrar sesión',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ],
+                  );
+                },
+                child: Text('Registrar Asesino'),
+                style: ElevatedButton.styleFrom(
+                 backgroundColor: const Color.fromARGB(255, 146, 146, 146), // Color de fondo, // Color del botón
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                ),
               ),
-            ),
+              FutureBuilder<List<String>>(
+                future: Provider.of<AuthServices>(context, listen: false).getAsesinos(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}', style: TextStyle(color: Colors.red)));
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Center(child: Text('No se encontraron asesinos', style: TextStyle(color: Colors.white)));
+                  } else {
+                    final asesinos = snapshot.data!;
+                    return ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: asesinos.length,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                          title: Text(
+                            asesinos[index],
+                            style: const TextStyle(fontSize: 20, color: Colors.white),
+                          ),
+                          leading: Icon(Icons.person, color: Colors.redAccent),
+                        );
+                      },
+                    );
+                  }
+                },
+              ),
+            ],
           ),
         ),
       ),
