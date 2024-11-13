@@ -39,13 +39,12 @@ class _VideoScreenState extends State<VideoScreen> {
     return Scaffold(
       body: Center(
         child: _controller.value.isInitialized
-            ? ClipRect( // Limita el área del video
-                child: Transform.scale(
-                  scale: 1.5, // Cambia este valor para ajustar el zoom
-                  child: AspectRatio(
-                    aspectRatio: _controller.value.aspectRatio,
-                    child: VideoPlayer(_controller),
-                  ),
+            ? FittedBox(
+                fit: BoxFit.cover,
+                child: SizedBox(
+                  width: _controller.value.size.width,
+                  height: _controller.value.size.height,
+                  child: VideoPlayer(_controller),
                 ),
               )
             : const CircularProgressIndicator(),

@@ -45,6 +45,7 @@ class _LoginForm extends StatelessWidget {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(16),
+        child: SingleChildScrollView( // Añade el scroll aquí
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -147,7 +148,7 @@ class _LoginForm extends StatelessWidget {
               ),
             ),
             ElevatedButton(
-  onPressed: loginForm.isLoading
+       onPressed: loginForm.isLoading
       ? null
       : () async {
           final authService = Provider.of<AuthServices>(context, listen: false);
@@ -207,6 +208,7 @@ class _LoginForm extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }

@@ -59,41 +59,35 @@ class AuthServices extends ChangeNotifier {
   }
 
   Future<String?> login(String email, String password) async {
-    final Map<String, dynamic> authData = {
-      'Email' : email,
-      'Password' : password
-    };
+  final Map<String, dynamic> authData = {
+    'Email': email,
+    'Password': password
+  };
 
-    final url = Uri.http(_baseUrl, '/api/Cuentas/Login');
+  final url = Uri.http(_baseUrl, '/api/Cuentas/Login');
 
+  try {
     final resp = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
       body: json.encode(authData),
     );
 
-    final Map<String, dynamic> decodeResp = json.decode(resp.body);
-
-    if(decodeResp.containsKey('token')){
-      await storage.write(key: 'token', value: decodeResp['token']);
-      return null;
+    if (resp.statusCode == 200) {
+      final decodeResp = json.decode(resp.body);
+      if (decodeResp.containsKey('token')) {
+        await storage.write(key: 'token', value: decodeResp['token']);
+        return null;
+      }
     }
-    else if (decodeResp.containsKey('errors')){
-      final errors = decodeResp['errors'];
-      if (errors.containsKey('Email')) {
-        print('Error en Email: ${errors['Email'][0]}');
-        return errors['Email'][0];
-      }
-      if (errors.containsKey('Password')) {
-        print('Error en Password: ${errors['Password'][0]}');
-        return errors['Password'][0];
-      }
-    } 
-    else {
-      return decodeResp['Error'];
-    } 
-    
+
+    final decodeResp = json.decode(resp.body);
+    return decodeResp['Error'] ?? 'Error de autenticación';
+  } catch (e) {
+    return 'Error al conectar con el servidor';
   }
+}
+
 
  // Método para obtener los nombres de los asesinos
   Future<List<String>> getAsesinos() async {
