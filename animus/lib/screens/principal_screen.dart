@@ -22,43 +22,43 @@ class PrincipalScreen extends StatelessWidget {
       ),
       home: Scaffold(
         appBar: AppBar(
-  backgroundColor: Colors.black87,
-  title: Row(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: [
-      Image.network(
-        'https://static.wikia.nocookie.net/theassassinscreed/images/0/0a/Abstergo-FH.png/revision/latest?cb=20180629071736&path-prefix=es',
-        height: 30,
-        fit: BoxFit.contain,
-      ),
-      const SizedBox(width: 10),
-      const Text(
-        'Bienvenido al Animus',
-        style: TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-          fontSize: 24,
+          backgroundColor: Colors.black87,
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.network(
+                'https://static.wikia.nocookie.net/theassassinscreed/images/0/0a/Abstergo-FH.png/revision/latest?cb=20180629071736&path-prefix=es',
+                height: 30,
+                fit: BoxFit.contain,
+              ),
+              const SizedBox(width: 10),
+              const Text(
+                'Bienvenido al Animus',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                ),
+              ),
+            ],
+          ),
+          centerTitle: true,
+          leading: Builder(
+            builder: (context) => IconButton(
+              icon: const Icon(Icons.menu),
+              onPressed: () => Scaffold.of(context).openDrawer(),
+            ),
+          ),
         ),
-      ),
-    ],
-  ),
-  centerTitle: true,
-  leading: Builder(
-    builder: (context) => IconButton(
-      icon: const Icon(Icons.menu),
-      onPressed: () => Scaffold.of(context).openDrawer(),
-    ),
-  ),
-),
         drawer: Drawer(
           child: ListView(
             padding: EdgeInsets.zero,
             children: <Widget>[
               DrawerHeader(
                 decoration: const BoxDecoration(
-                   gradient: LinearGradient(
-                   colors: [Color.fromARGB(221, 6, 25, 59), Color.fromARGB(221, 26, 76, 169)],
-                   begin: Alignment.topCenter,
+                  gradient: LinearGradient(
+                    colors: [Color.fromARGB(221, 6, 25, 59), Color.fromARGB(221, 26, 76, 169)],
+                    begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                   ),
                 ),
@@ -82,17 +82,13 @@ class PrincipalScreen extends StatelessWidget {
                 leading: const Icon(Icons.logout),
                 title: const Text('Cerrar sesión'),
                 onTap: () async {
-                  // Llamada a la función de cerrar sesión
                   await authServices.logout();
-                  final authService = Provider.of<AuthServices>(context, listen: false);
-          await authService.logout();
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const LoginScreen()),
-                );
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => const LoginScreen()),
+                  );
                 },
               ),
-              // Aquí puedes agregar más opciones en el Drawer
             ],
           ),
         ),
@@ -108,7 +104,6 @@ class PrincipalScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                
                 const SizedBox(height: 20),
                 FutureBuilder<List<String>>(
                   future: authServices.getAsesinos(),
@@ -126,10 +121,45 @@ class PrincipalScreen extends StatelessWidget {
                         style: TextStyle(color: Colors.white),
                       );
                     } else {
-                      return Column(
-                        children: snapshot.data!
-                            .map((nombre) => Text(nombre, style: const TextStyle(color: Colors.white)))
-                            .toList(),
+                      return Expanded(
+                        child: ListView.builder(
+                          itemCount: snapshot.data!.length,
+                          itemBuilder: (context, index) {
+                            String nombreAsesino = snapshot.data![index];
+                            return FutureBuilder<ImageProvider?>(
+                              future: authServices.getAsesinoImagen(nombreAsesino),
+                              builder: (context, imgSnapshot) {
+                                if (imgSnapshot.connectionState == ConnectionState.waiting) {
+                                  return const CircularProgressIndicator();
+                                } else if (imgSnapshot.hasError || !imgSnapshot.hasData) {
+                                  return ListTile(
+                                    title: Text(
+                                      nombreAsesino,
+                                      style: const TextStyle(color: Colors.white, fontSize: 22),  // Aumenta el tamaño del texto
+                                    ),
+                                    leading: const Icon(Icons.error, color: Colors.red),
+                                  );
+                                } else {
+                                  return ListTile(
+                                  title: Row(
+                                    children: [
+                                      CircleAvatar(
+                                        backgroundImage: imgSnapshot.data!,
+                                        radius: 30,  // Tamaño de la imagen
+                                      ),
+                                      const SizedBox(width: 10),  // Espacio pequeño entre la imagen y el nombre
+                                      Text(
+                                        nombreAsesino,
+                                        style: const TextStyle(color: Colors.white, fontSize: 22),  // Aumenta el tamaño del texto
+                                      ),
+                                    ],
+                                  ),
+                                );
+                                }
+                              },
+                            );
+                          },
+                        ),
                       );
                     }
                   },

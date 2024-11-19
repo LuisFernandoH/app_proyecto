@@ -102,6 +102,28 @@ class AuthServices extends ChangeNotifier {
     }
   }
 
+   // Método para obtener la imagen de un asesino por su nombre
+  Future<ImageProvider?> getAsesinoImagen(String nombre) async {
+    final url = Uri.http(_baseUrl, '/api/Asesinos/$nombre');  // Endpoint con el nombre del asesino
+    try {
+      final resp = await http.get(url);
+
+      if (resp.statusCode == 200) {
+        // Si la respuesta es exitosa y la imagen es válida
+        if (resp.headers['content-type']?.contains('image/jpeg') == true) {
+          // Convertir los bytes a una imagen que Flutter puede mostrar
+          return MemoryImage(resp.bodyBytes);
+        } else {
+          return AssetImage('assets/placeholder.png');  // Imagen de marcador si no se encuentra la imagen
+        }
+      } else {
+        return AssetImage('assets/placeholder.png');  // Imagen de marcador en caso de error
+      }
+    } catch (e) {
+      return AssetImage('assets/placeholder.png');  // Imagen de marcador en caso de error
+    }
+  }
+
 // Método para registrar asesinos en el servicio AuthServices
 Future<String?> registrarAsesino(Map<String, dynamic> data) async {
   try {
@@ -132,7 +154,8 @@ Future<String?> registrarAsesino(Map<String, dynamic> data) async {
 }
 
 
-  //PA SABER SI todavia tiene la cuenta activa. si no existe nada regresa vacio, q significa que no esta autenticado
+    // Método para leer el token (si está almacenado)
+
   Future<String> readToken() async {
     return await storage.read(key: 'token') ?? '';
   }
