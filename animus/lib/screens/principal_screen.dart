@@ -33,7 +33,7 @@ class PrincipalScreen extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               const Text(
-                'Bienvenido al Animus',
+                '',
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -51,47 +51,59 @@ class PrincipalScreen extends StatelessWidget {
           ),
         ),
         drawer: Drawer(
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: <Widget>[
-              DrawerHeader(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Color.fromARGB(221, 6, 25, 59), Color.fromARGB(221, 26, 76, 169)],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Image.network(
-                      'https://abstergo.org/wp-content/uploads/2016/06/cropped-abstergo-logo-new-movie-1.png',
-                      height: 80,
-                      fit: BoxFit.contain,
-                    ),
-                    const SizedBox(height: 10),
-                    const Text(
-                      'Opciones',
-                      style: TextStyle(color: Colors.white, fontSize: 24),
-                    ),
-                  ],
-                ),
-              ),
-              ListTile(
-                leading: const Icon(Icons.logout),
-                title: const Text('Cerrar sesión'),
-                onTap: () async {
-                  await authServices.logout();
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => const LoginScreen()),
-                  );
-                },
-              ),
-            ],
+  child: ListView(
+    padding: EdgeInsets.zero,
+    children: <Widget>[
+      DrawerHeader(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color.fromARGB(221, 6, 25, 59), Color.fromARGB(221, 26, 76, 169)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
         ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Image.network(
+              'https://abstergo.org/wp-content/uploads/2016/06/cropped-abstergo-logo-new-movie-1.png',
+              height: 80,
+              fit: BoxFit.contain,
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              'Opciones',
+              style: TextStyle(color: Colors.white, fontSize: 24),
+            ),
+          ],
+        ),
+      ),
+      // Opción para cerrar sesión
+      ListTile(
+        leading: const Icon(Icons.logout),
+        title: const Text('Cerrar sesión'),
+        onTap: () async {
+          await authServices.logout();
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const LoginScreen()),
+          );
+        },
+      ),
+      // Opción para registrar asesino
+      ListTile(
+        leading: const Icon(Icons.person_add),
+        title: const Text('Registrar Asesino'),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => RegistrarAsesino()),
+          );
+        },
+      ),
+    ],
+  ),
+),
         body: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -122,7 +134,7 @@ class PrincipalScreen extends StatelessWidget {
                       );
                     } else {
                       return Expanded(
-                        child: ListView.builder(
+                        child: PageView.builder(
                           itemCount: snapshot.data!.length,
                           itemBuilder: (context, index) {
                             String nombreAsesino = snapshot.data![index];
@@ -132,29 +144,32 @@ class PrincipalScreen extends StatelessWidget {
                                 if (imgSnapshot.connectionState == ConnectionState.waiting) {
                                   return const CircularProgressIndicator();
                                 } else if (imgSnapshot.hasError || !imgSnapshot.hasData) {
-                                  return ListTile(
-                                    title: Text(
-                                      nombreAsesino,
-                                      style: const TextStyle(color: Colors.white, fontSize: 22),  // Aumenta el tamaño del texto
+                                  return Center(
+                                    child: ListTile(
+                                      title: Text(
+                                        nombreAsesino,
+                                        style: const TextStyle(color: Colors.white, fontSize: 22),
+                                      ),
+                                      leading: const Icon(Icons.error, color: Colors.red),
                                     ),
-                                    leading: const Icon(Icons.error, color: Colors.red),
                                   );
                                 } else {
-                                  return ListTile(
-                                  title: Row(
-                                    children: [
-                                      CircleAvatar(
-                                        backgroundImage: imgSnapshot.data!,
-                                        radius: 30,  // Tamaño de la imagen
-                                      ),
-                                      const SizedBox(width: 10),  // Espacio pequeño entre la imagen y el nombre
-                                      Text(
-                                        nombreAsesino,
-                                        style: const TextStyle(color: Colors.white, fontSize: 22),  // Aumenta el tamaño del texto
-                                      ),
-                                    ],
-                                  ),
-                                );
+                                  return Center(
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        CircleAvatar(
+                                          backgroundImage: imgSnapshot.data!,
+                                          radius: 150,  // Tamaño de la imagen
+                                        ),
+                                        const SizedBox(height: 10), // Espacio entre la imagen y el nombre
+                                        Text(
+                                          nombreAsesino,
+                                          style: const TextStyle(color: Colors.white, fontSize: 22),
+                                        ),
+                                      ],
+                                    ),
+                                  );
                                 }
                               },
                             );
@@ -163,21 +178,6 @@ class PrincipalScreen extends StatelessWidget {
                       );
                     }
                   },
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => RegistrarAsesino(),
-                      ),
-                    );
-                  },
-                  child: const Text('Registrar Asesino'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 146, 146, 146),
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                  ),
                 ),
               ],
             ),
