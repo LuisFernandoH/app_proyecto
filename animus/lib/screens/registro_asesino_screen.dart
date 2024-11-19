@@ -1,30 +1,96 @@
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:convert';
 import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
+import 'package:mime/mime.dart'; // To get MIME type
 
-class RegistroAsesinoScreen extends StatefulWidget {
-  const RegistroAsesinoScreen({super.key});
-
+class RegistrarAsesino extends StatefulWidget {
   @override
-  _RegistroAsesinoScreenState createState() => _RegistroAsesinoScreenState();
+  _RegistrarAsesinoState createState() => _RegistrarAsesinoState();
 }
 
-class _RegistroAsesinoScreenState extends State<RegistroAsesinoScreen> {
+class _RegistrarAsesinoState extends State<RegistrarAsesino> {
   final _nombreController = TextEditingController();
   final _apellidoController = TextEditingController();
   final _descripcionController = TextEditingController();
-  File? _image;  // Variable para almacenar la imagen seleccionada
+  File? _image;
+  bool _isLoading = false;
 
-  final ImagePicker _picker = ImagePicker();
-
-  // Método para seleccionar la imagen
   Future<void> _pickImage() async {
-    final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery); // Puedes cambiar a ImageSource.camera si quieres usar la cámara.
+    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
         _image = File(pickedFile.path);
+      });
+    }
+  }
+
+  Future<void> _registerAssassin() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    final nombre = _nombreController.text.trim();
+    final apellido = _apellidoController.text.trim();
+    final descripcion = _descripcionController.text.trim();
+
+    if (nombre.isEmpty || apellido.isEmpty || descripcion.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Por favor, llena todos los campos')),
+      );
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+
+    if (_image == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Por favor, selecciona una imagen')),
+      );
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+
+    try {
+      var uri = Uri.parse('http://Animus.somee.com/api/Asesinos');
+      var request = http.MultipartRequest('POST', uri)
+        ..fields['nombre'] = nombre
+        ..fields['apellido'] = apellido
+        ..fields['descripcion'] = descripcion;
+
+      // Add the image as a multipart file
+      var mimeType = lookupMimeType(_image!.path);
+      var imageBytes = await _image!.readAsBytes();
+      var multipartFile = http.MultipartFile.fromBytes(
+        'imagen', 
+        imageBytes, 
+        filename: _image!.path.split('/').last,
+        contentType: MediaType.parse(mimeType!),
+      );
+      request.files.add(multipartFile);
+
+      var response = await request.send();
+      if (response.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Asesino registrado con éxito')),
+        );
+        Navigator.pop(context);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${response.statusCode}')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${e.toString()}')),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
       });
     }
   }
@@ -34,7 +100,6 @@ class _RegistroAsesinoScreenState extends State<RegistroAsesinoScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Datos del Asesino'),
-        backgroundColor: const Color.fromARGB(221, 139, 139, 139),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -52,52 +117,16 @@ class _RegistroAsesinoScreenState extends State<RegistroAsesinoScreen> {
               controller: _descripcionController,
               decoration: const InputDecoration(labelText: 'Descripción'),
             ),
-            const SizedBox(height: 20),
-            // Mostrar la imagen seleccionada
-            _image != null
-                ? Image.file(_image!, height: 150, width: 150, fit: BoxFit.cover)
-                : const Text('No se ha seleccionado ninguna imagen'),
-            const SizedBox(height: 10),
             ElevatedButton(
               onPressed: _pickImage,
               child: const Text('Seleccionar Imagen'),
             ),
-            const SizedBox(height: 20),
+            if (_image != null) ...[
+              Image.file(_image!),
+            ],
             ElevatedButton(
-              onPressed: () async {
-                // Convertir la imagen a base64
-                String? imageBase64;
-                if (_image != null) {
-                  final bytes = await _image!.readAsBytes();
-                  imageBase64 = base64Encode(bytes); // Convertimos la imagen a base64
-                }
-
-                // Crear el objeto para enviar
-                final asesinoData = {
-                  'nombre': _nombreController.text,
-                  'apellido': _apellidoController.text,
-                  'descripcion': _descripcionController.text,
-                  'imagen': imageBase64, // Incluir la imagen codificada en base64
-                };
-
-                // Realizar la solicitud a la API
-                final url = Uri.http('Animus.somee.com', '/api/Asesinos');
-                final response = await http.post(
-                  url,
-                  headers: {'Content-Type': 'application/json'},
-                  body: json.encode(asesinoData),
-                );
-
-                if (response.statusCode == 200) {
-                  // Si la respuesta es exitosa, mostrar un mensaje y regresar
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Asesino registrado con éxito')));
-                  Navigator.pop(context);  // Regresar a la pantalla principal
-                } else {
-                  // Si hay un error, mostrar un mensaje
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error al registrar el asesino')));
-                }
-              },
-              child: const Text('Registrar Asesino'),
+              onPressed: _isLoading ? null : _registerAssassin,
+              child: _isLoading ? CircularProgressIndicator() : const Text('Registrar Asesino'),
             ),
           ],
         ),

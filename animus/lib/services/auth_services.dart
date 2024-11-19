@@ -102,21 +102,35 @@ class AuthServices extends ChangeNotifier {
     }
   }
 
-// Método para registrar asesinos
-  Future<String?> registrarAsesino(Map<String, String> asesinoData) async {
-  final url = Uri.http(_baseUrl, '/api/Asesinos');
-  final response = await http.post(
-    url,
-    headers: {'Content-Type': 'application/json'},
-    body: json.encode(asesinoData),
-  );
+// Método para registrar asesinos en el servicio AuthServices
+Future<String?> registrarAsesino(Map<String, dynamic> data) async {
+  try {
+    final url = Uri.http('Animus.somee.com', '/api/Asesinos');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(data),
+    );
 
-  if (response.statusCode == 200) {
-    return null; // El registro fue exitoso
-  } else {
-    return 'Error al registrar al asesino';
+    print('Estado: ${response.statusCode}');
+    print('Respuesta: ${response.body}');
+
+    if (response.statusCode == 201) {
+      return null; // Registro exitoso
+    } else {
+      // Intenta decodificar el mensaje de error
+      try {
+        final error = jsonDecode(response.body);
+        return error['error'] ?? 'Error no especificado por el servidor';
+      } catch (_) {
+        return 'Error inesperado: ${response.body}';
+      }
+    }
+  } catch (e) {
+    return 'Error de red: $e';
   }
 }
+
 
   //PA SABER SI todavia tiene la cuenta activa. si no existe nada regresa vacio, q significa que no esta autenticado
   Future<String> readToken() async {

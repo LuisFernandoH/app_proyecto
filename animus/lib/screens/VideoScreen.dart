@@ -22,8 +22,7 @@ class _VideoScreenState extends State<VideoScreen> {
     // Escucha el estado del video para saber cuándo termina
     _controller.addListener(() {
       if (_controller.value.position == _controller.value.duration) {
-        // Redirige a la pantalla principal cuando el video termine
-        Navigator.pushReplacementNamed(context, 'home');
+        _navigateToHome(); // Llama a la función para navegar cuando el video termine
       }
     });
   }
@@ -34,20 +33,28 @@ class _VideoScreenState extends State<VideoScreen> {
     super.dispose();
   }
 
+  void _navigateToHome() {
+    Navigator.pushReplacementNamed(context, 'home'); // Redirige a la pantalla principal
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: _controller.value.isInitialized
-            ? FittedBox(
-                fit: BoxFit.cover,
-                child: SizedBox(
-                  width: _controller.value.size.width,
-                  height: _controller.value.size.height,
-                  child: VideoPlayer(_controller),
-                ),
-              )
-            : const CircularProgressIndicator(),
+      backgroundColor: const Color.fromARGB(255, 1, 6, 14), // Fondo azul oscuro detrás del video
+      body: GestureDetector(
+        onTap: _navigateToHome, // Salta el video si el usuario toca la pantalla
+        child: Center(
+          child: _controller.value.isInitialized
+              ? FittedBox(
+                  fit: BoxFit.cover,
+                  child: SizedBox(
+                    width: _controller.value.size.width,
+                    height: _controller.value.size.height,
+                    child: VideoPlayer(_controller),
+                  ),
+                )
+              : const CircularProgressIndicator(),
+        ),
       ),
     );
   }

@@ -1,3 +1,4 @@
+import 'package:animus/screens/registro_asesino_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:animus/screens/checking_screen.dart';
 import 'package:animus/screens/login_screen.dart';
