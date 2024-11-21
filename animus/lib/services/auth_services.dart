@@ -164,6 +164,20 @@ Future<Map<String, dynamic>> getDatosAsesino(String nombre) async {
   }
 }
 
+// Método para eliminar un asesino
+  Future<void> eliminarAsesino(String nombre) async {
+    final url = Uri.parse('http://Animus.somee.com/api/Asesinos/nombre/$nombre');
+
+    final response = await http.delete(url);
+
+    if (response.statusCode == 204) {
+      // El asesino fue eliminado exitosamente
+      return;
+    } else {
+      // Manejar el error si no se eliminó correctamente
+      throw Exception('Error al eliminar el asesino');
+    }
+  }
 
 
     // Método para leer el token (si está almacenado)
