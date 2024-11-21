@@ -153,6 +153,18 @@ Future<String?> registrarAsesino(Map<String, dynamic> data) async {
   }
 }
 
+Future<Map<String, dynamic>> getDatosAsesino(String nombre) async {
+  final response = await http.get(Uri.parse('http://Animus.somee.com/api/Asesinos/datos/$nombre'));
+
+  if (response.statusCode == 200) {
+    // Si la respuesta es correcta, decodifica los datos
+    return json.decode(response.body);
+  } else {
+    throw Exception('Error al obtener datos del asesino');
+  }
+}
+
+
 
     // Método para leer el token (si está almacenado)
 
